@@ -1,0 +1,22 @@
+** Create a function to split the number and text **
+
+Function SplitTextAndNumber(cellValue As String) As Variant
+    Dim result(1) As String
+    Dim firstSpacePos As Long
+    
+    ' Find the position of the first space
+    firstSpacePos = InStr(cellValue, " ")
+    
+    If firstSpacePos > 0 Then
+        ' Split the text by the first space
+        result(0) = Left(cellValue, firstSpacePos - 1) ' Numerical part
+        result(1) = Mid(cellValue, firstSpacePos + 1) ' Text part
+    Else
+        ' If no space is found, return the entire text as the numerical part
+        result(0) = cellValue
+        result(1) = ""
+    End If
+    
+    SplitTextAndNumber = result
+End Function
+
