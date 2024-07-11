@@ -123,3 +123,75 @@ ErrorHandler:
 End Sub
 
 
+** Finalized the bath type
+
+Public Sub bathtype()
+    Dim headerRange As Range
+    Dim foundOrigin As Range
+    Dim origin As Long
+    Dim foundAssign As Range
+    Dim assign As Long
+    Dim nextcell As Long
+    Dim assigntype As String
+    Dim origintype As String
+    Dim finaltype As String
+    
+    ' Assign the header
+    Set ws = ActiveSheet
+    Set headerRange = ws.Rows(1)
+    
+    If headerRange Is Nothing Then
+        MsgBox "Header range not found."
+        Exit Sub
+    End If
+    
+    
+    'Find the correct column for original bath type
+    Set foundOriginal = headerRange.Find(What:="bath_type", LookIn:=xlValues, LookAt:=xlWhole)
+    If Not foundOriginal Is Nothing Then
+        origin = foundOriginal.Column
+    Else
+        MsgBox "Column 'original bath type' not found."
+        Exit Sub
+    End If
+    
+    ' Find the correct column for assigned bath type
+    Set foundAssign = headerRange.Find(What:="bath type", LookIn:=xlValues, LookAt:=xlWhole)
+    If Not foundAssign Is Nothing Then
+        assign = foundAssign.Column
+    Else
+        MsgBox "Column 'assigned bath type' not found."
+        Exit Sub
+    End If
+    
+        ' Find last row
+    lastRow = ws.Cells(ws.Rows.Count, origin).End(xlUp).Row
+    
+    ' Assign the column for finalized bath type
+    nextcell = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column + 1
+    ws.Cells(1, nextcell).Value = "finalized_bath_type"
+    
+    ' Assign the finalized bath type
+    For i = 2 To lastRow
+        assigntype = ws.Cells(i, assign).Value
+        origintype = ws.Cells(i, origin).Value
+        
+        If IsError(assigntype) Or IsError(origintype) Then
+            finaltype = "unknown"
+        Else
+            If origintype = "bath" Or origintype = "baths" Then
+                finaltype = assigntype
+            Else
+                finaltype = origintype
+            End If
+        End If
+        
+        ws.Cells(i, nextcell) = finaltype
+    Next i
+    
+    MsgBox "Bath type determination completed."
+        
+            
+End Sub
+
+
