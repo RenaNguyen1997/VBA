@@ -20,3 +20,106 @@ Function SplitTextAndNumber(cellValue As String) As Variant
     SplitTextAndNumber = result
 End Function
 
+** Create method to assign type of bath room based on set conditions
+
+Public Sub DetermineBathType()
+    On Error GoTo ErrorHandler
+
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim propertyTypeCol As Long
+    Dim numBathroomsCol As Long
+    Dim bathTypeCol As Long
+    Dim propertyType As String
+    Dim numBathrooms As Double
+    Dim bathType As String
+    Dim headerRange As Range
+    Dim foundCell As Range
+
+    ' Set the worksheet to the active sheet
+    Set ws = ActiveSheet
+
+    ' Debugging: Ensure the worksheet is correctly set
+    If ws Is Nothing Then
+        MsgBox "Worksheet not found. Please ensure the worksheet is active."
+        Exit Sub
+    End If
+
+    ' Debugging: Check the sheet name
+    MsgBox "Working on sheet: " & ws.Name
+
+    ' Assume headers are in the first row
+    Set headerRange = ws.Rows(1)
+
+    ' Debugging: Ensure the header range is correctly set
+    If headerRange Is Nothing Then
+        MsgBox "Header range not found."
+        Exit Sub
+    End If
+
+    ' Find the column number for "property type"
+    Set foundCell = headerRange.Find(What:="room_type", LookIn:=xlValues, LookAt:=xlWhole)
+    If Not foundCell Is Nothing Then
+        propertyTypeCol = foundCell.Column
+    Else
+        MsgBox "Column 'property type' not found."
+        Exit Sub
+    End If
+
+    ' Find the column number for "number of bathrooms"
+    Set foundCell = headerRange.Find(What:="bathrooms", LookIn:=xlValues, LookAt:=xlWhole)
+    If Not foundCell Is Nothing Then
+        numBathroomsCol = foundCell.Column
+    Else
+        MsgBox "Column 'number of bathrooms' not found."
+        Exit Sub
+    End If
+
+    ' Determine the column for "bath type"
+    bathTypeCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column + 1
+
+    ' Ensure the column is within allowable range
+    If bathTypeCol > ws.Columns.Count Then
+        MsgBox "Column limit exceeded. Cannot add 'bath type' column."
+        Exit Sub
+    End If
+
+    ' Add header for the bath type column
+    ws.Cells(1, bathTypeCol).Value = "bath type"
+
+    ' Find the last row with data in the "property type" column
+    lastRow = ws.Cells(ws.Rows.Count, propertyTypeCol).End(xlUp).Row
+
+    ' Loop through each row, starting from row 2 (assuming row 1 has headers)
+    For i = 2 To lastRow
+        ' Read the property type and number of bathrooms
+        propertyType = ws.Cells(i, propertyTypeCol).Value
+        numBathrooms = ws.Cells(i, numBathroomsCol).Value
+
+        ' Determine the bath type based on the conditions
+        If propertyType = "Entire home/apt" Then
+            If numBathrooms < 2 Then
+                bathType = "private"
+            Else
+                bathType = "shared"
+            End If
+        ElseIf propertyType = "Private room" Then
+            bathType = "private"
+        Else
+            bathType = "unknown"
+        End If
+
+        ' Write the bath type to the determined column
+        ws.Cells(i, bathTypeCol).Value = bathType
+    Next i
+
+    MsgBox "Bath type determination completed."
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description
+End Sub
+
+
